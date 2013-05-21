@@ -17,7 +17,6 @@
         var s, 
             deferred,
             cached_result,
-            context = {},
             update_cache = false;
 
         // same as jQuery.ajax
@@ -45,22 +44,23 @@
             url = url || s.url;
             options.amc_key = options.amc_key || (url + (url.indexOf('?') !== -1 ? '&':'?') + s.data);
             cached_result = _cache_get(options.amc_group, options.amc_key);
-            
+
             if (cached_result) {
                 // cache hit, fire 'done' callback(s) in options
+                deferred = $.Deferred();
+
                 if (options.success) {
                     if (typeof options.success == "function") {
                         options.success = [options.success];
                     }
 
                     $.each(options.success, function(idx, cb){
-                        cb.call(s.context, cached_result);
+                        deferred.done(cb);
                     })
                 }
-                deferred = $.Deferred();
-
+                
                 window.setTimeout(function(){
-                    deferred.resolveWith(context, [cached_result]);
+                    deferred.resolveWith(options.context, [cached_result]);
                 }, 1);
 
                 // job done, another ajax request saved.
